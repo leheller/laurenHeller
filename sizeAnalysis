@@ -1,0 +1,10 @@
+   def sizeAnalysis(image):
+    UL = 
+    LL =
+    UR = 
+    textH = UL - LL
+    textW = UL - UR
+    if textH + textW < mid:
+        return "You have small handwriting: you have strong focus and concentration and you are introverted!"
+    else:
+        return "You have large handwriting: you are people oriented and want to be noticed!"
