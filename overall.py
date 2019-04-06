@@ -3,50 +3,44 @@ import cv2
 import numpy as np
 import math
 
-image = input("Give me the image name, bitch ---> ")
 
-def getMax(imageName):
+def getMax(image):
     list = [i for i in range(0,256)]
     counts = dict()
     for i in range(len(list)):
         counts[list[i]]=0
-    img = cv2.imread(imageName)
-    for i in range(img.shape[0]):
-        for j in range(img.shape[1]):
-            value = img[i][j]
-            R = value[0]
-            G = value[1]
-            B = value[2]
-            gray = round((R + G + B) / 3)
-            counts[gray] += 1
+    img = cv2.imread(image)
+    gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+    for i in range(gray.shape[0]):
+        for j in range(gray.shape[1]):
+            value = gray[i][j]
+            counts[value] += 1
     bestVal = 0
-    for value in counts:
-        if counts[value] > bestVal:
+    for value in range(len(counts)):
+        if counts[value] > bestVal and value < 200:
             bestVal = counts[value]
             bestKey = value
     return bestKey
 
 def pressureAnalyzer(image):
     pressure = getMax(image)
-    if pressure > 125:
-        return"Low pressure -> you are easy going and chill"
-    elif pressure > 75:
-        return"Medium pressure -> you are boring:("
+    print(pressure)
+    if pressure > 140:
+        return"Low pressure --> you are easy going and chill!"
+    elif pressure > 90:
+        return"Medium pressure --> you are boring:("
     else:
-        return"High pressure -> you have strong emotions and are quick to react"
+        return"High pressure --> you have strong emotions and are quick to reactXD"
 
 def sizeAnalysis(imageName):
     UL, LR = getSize(imageName)
-    print(UL, LR)
     textH = abs(UL[1] - LR[1])
     textW = abs(UL[0] - LR[0])
-    print(textH, textW)
     mid = 3
     if textH + textW < mid:
-        return "You have small handwriting: you have strong focus and concentration and you are introverted!"
+        return "Small handwriting --> you have strong focus and concentration and you are introverted!"
     else:
-        return "You have large handwriting: you are people oriented and want to be noticed!"
-
+        return "Large handwriting --> you are people oriented and want to be noticed!"
 
 def getSlant(image):
     im = cv2.imread(image)
@@ -68,11 +62,11 @@ def getSlant(image):
     middle = int(img.shape[1]//2)
     difference = middle - avSumDif
     if difference < -15:
-        return "Leftward slant --> you are rebellious and like to work alone"
+        return "Leftward slant --> you are rebellious and like to work alone>:)"
     elif difference > 15:
-        return "Rightward slant --> you are a social butterfly"
+        return "Rightward slant --> you are a social butterfly!"
     else:
-        return "No slant --> you are logical and practical"
+        return "No slant --> you are logical and practical!"
         
 def getGray(value):
     R = value[0]
@@ -111,12 +105,23 @@ def getSize(imageName):
     LR[1] *= pixelSize
     return (UL, LR)
 
+def roundness(image):
+    #set maxRadius equal to half the linesize 
+    img = cv2.imread(image,0)
+    img = cv2.medianBlur(img,5)
+    img = cv2.cvtColor(img,cv2.COLOR_GRAY2BGR)
+    circles = cv2.HoughCircles(img,cv2.HOUGH_GRADIENT,1,20,param1=50,param2=30,minRadius=0,maxRadius=40)
+    circles = np.uint16(np.around(circles))
+    numCircles = 0
+    for i in circles[0,:]:
+        numCircles += 1
+    print(numCircles)
+
 def handwriting(image):
     pressure = pressureAnalyzer(image)
     size = sizeAnalysis(image)
-    #wordSpace = getSpace(image)
-    result = "Your results: \n" + pressure + "\n" + size + "\n" #+ wordSpace
-    print(result)
+    slant = getSlant(image)
+    result = "Your results: \n" + pressure + "\n" + size + "\n" + slant
     return result
 
 def makeResultsPretty(canvas, width, height, image):
@@ -124,13 +129,18 @@ def makeResultsPretty(canvas, width, height, image):
     canvas.create_rectangle(0, 0, width, height, fill = "light blue")
     canvas.create_text(width // 2, height // 2, text = analysis) #handwriting
 
+def draw(canvas, width, height, image):
+    makeResultsPretty(canvas, width, height, image)
+
 def runDrawing(image, width=300, height=300):
     root = Tk()
     root.resizable(width=False, height=False) # prevents resizing window
     canvas = Canvas(root, width=width, height=height)
     canvas.configure(bd=0, highlightthickness=0)
     canvas.pack()
-    makeResultsPretty(canvas, width, height, image)
+    draw(canvas, width, height, image)
     root.mainloop()
+    print("bye!")
 
+image = input("Give me the image name ---> ")
 runDrawing(image, 500, 100)
