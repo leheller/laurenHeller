@@ -59,7 +59,8 @@ def getSlant(image):
         sumDif += avDif
         img = cv2.rectangle(img,(leftmost[0],topmost[1]),(rightmost[0],bottommost[1]),(0,255,0),2)
     avSumDif = int(sumDif//len(contours))
-    middle = int(img.shape[1]//2)
+    try: middle = int(img.shape[1]//2)
+    except: return "Slant not detected"
     difference = middle - avSumDif
     if difference < -15:
         return "Leftward slant --> you are rebellious and like to work alone>:)"
