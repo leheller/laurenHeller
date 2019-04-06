@@ -60,8 +60,7 @@ def getSlant(image):
         sumDif += avDif
         img = cv2.rectangle(img,(leftmost[0],topmost[1]),(rightmost[0],bottommost[1]),(0,255,0),2)
     avSumDif = int(sumDif//len(contours))
-    try: middle = int(img.shape[1]//2)
-    except: return "Slant not detected"
+    middle = int(img.shape[1]//2)
     difference = middle - avSumDif
     if difference < -15:
         return "Leftward slant --> you are rebellious and like to work alone>:)"
@@ -125,10 +124,14 @@ def roundness(image):
         return "Normal letters --> you are logical and systematic!"
 
 def handwriting(image):
-    pressure = pressureAnalyzer(image)
-    size = sizeAnalysis(image)
-    slant = getSlant(image)
-    circles = roundness(image)
+    try: pressure = pressureAnalyzer(image)
+    except: pressure = "writing too awkward to detect pressure"
+    try: size = sizeAnalysis(image)
+    except: size = "writing too ugly to detect size"
+    try: slant = getSlant(image)
+    except: slant = "writing too messy to detect slant"
+    try: circles = roundness(image)
+    except: circles = "writing too weird to detect circles"
     result = "Your results: \n" + pressure + "\n" + size + "\n" + slant + "\n" + circles
     return result
 
