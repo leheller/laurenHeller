@@ -1,0 +1,107 @@
+from tkinter import *
+import cv2
+import math
+
+def getMax(imageName):
+    list = [i for i in range(0,256)]
+    counts = dict()
+    for i in range(len(list)):
+        counts[list[i]]=0
+    img = cv2.imread(imageName)
+    for i in range(img.shape[0]):
+        for j in range(img.shape[1]):
+            value = img[i][j]
+            R = value[0]
+            G = value[1]
+            B = value[2]
+            gray = round((R + G + B) / 3)
+            counts[gray] += 1
+    bestVal = 0
+    for value in counts:
+        if counts[value] > bestVal:
+            bestVal = counts[value]
+            bestKey = value
+    return bestKey
+
+def pressureAnalyzer(image):
+    pressure = getMax(image)
+    if pressure > 125:
+        return"Low pressure -> you are easy going and chill"
+    elif pressure > 75:
+        return"Medium pressure -> you are boring:("
+    else:
+        return"High pressure -> you have strong emotions and are quick to react"
+
+def sizeAnalysis(imageName):
+    UL, LR = getSize(imageName)
+    print(UL, LR)
+    textH = abs(UL[1] - LR[1])
+    textW = abs(UL[0] - LR[0])
+    print(textH, textW)
+    mid = 3
+    if textH + textW < mid:
+        return "You have small handwriting: you have strong focus and concentration and you are introverted!"
+    else:
+        return "You have large handwriting: you are people oriented and want to be noticed!"
+
+
+def getGray(value):
+    R = value[0]
+    G = value[1]
+    B = value[2]
+    return round((R + G + B) / 3)
+
+def getSize(imageName):
+    #3x5 index card
+    img = cv2.imread(imageName)
+    pixelRows = img.shape[0]
+    pixelCols = img.shape[1]
+    pixelSize = 5 / pixelCols
+    initialGray = getGray(img[0][0])
+    UL = [pixelCols, pixelRows]
+    LR = [0,0]
+    for i in range(pixelCols):
+        for j in range(pixelRows):
+            value = img[j][i]
+            gray = getGray(value)
+            if gray < initialGray - 20:
+                posUL = [j, i]
+                if sum(posUL) < sum(UL):
+                    UL = posUL
+    for i in range(pixelCols-1, 0, -1):
+        for j in range(pixelRows-1, 0, -1):
+            value = img[j][i]
+            gray = getGray(value)
+            if gray < initialGray - 20:
+                posLR = [j, i]
+                if sum(posLR) > sum(LR):
+                    LR = posLR
+    UL[0] *= pixelSize
+    UL[1] *= pixelSize
+    LR[0] *= pixelSize
+    LR[1] *= pixelSize
+    return (UL, LR)
+
+def handwriting(image):
+    pressure = pressureAnalyzer(image)
+    size = sizeAnalysis(image)
+    #wordSpace = getSpace(image)
+    result = "Your results: \n" + pressure + "\n" + size + "\n" #+ wordSpace
+    print(result)
+    return result
+
+def makeResultsPretty(canvas, width, height, image):
+    analysis = handwriting(image)
+    canvas.create_rectangle(0, 0, width, height, fill = "light blue")
+    canvas.create_text(width // 2, height // 2, text = analysis) #handwriting
+
+def runDrawing(width=300, height=300):
+    root = Tk()
+    root.resizable(width=False, height=False) # prevents resizing window
+    canvas = Canvas(root, width=width, height=height)
+    canvas.configure(bd=0, highlightthickness=0)
+    canvas.pack()
+    makeResultsPretty(canvas, width, height, 'sample1.jpg')
+    root.mainloop()
+
+runDrawing(500, 100)
