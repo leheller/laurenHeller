@@ -1,14 +1,41 @@
 import cv2
-
+import math
+  
 # importing library for plotting 
 from matplotlib import pyplot as plt 
   
 # reads an input image 
 img = cv2.imread("dogs.jpg")
-  
+#cv2.imshow(img, 1)
 # find frequency of pixels in range 0-255 
 histr = cv2.calcHist([img],[0],None,[256],[0,256]) 
   
 # show the plotting graph of an image 
-plt.plot(histr) 
-plt.show() 
+#plt.plot(histr) 
+#plt.show()
+
+
+
+list = [i for i in range(0,256)]
+
+counts = dict()
+for i in range(len(list)):
+    counts[list[i]]=0
+
+gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+ret,thresh = cv2.threshold(gray,47,255,cv2.THRESH_BINARY)
+cv2.imshow("thresh",thresh) #<-- grayscale image
+#cv2.imshow("original",img)  <-- original image
+cv2.waitKey(0)
+
+
+def getMax():
+    img = cv2.imread("dogs.jpg")
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    ret,thresh = cv2.threshold(gray,47,255,cv2.THRESH_BINARY)
+    #cv2.waitKey(0)
+    for i in range(img.shape[0]):
+        for j in range(img.shape[1]):
+            value = img[i][j]
+            counts[value] += 1
+    return math.max(counts.values)
