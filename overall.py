@@ -10,7 +10,8 @@ def getMax(image):
     for i in range(len(list)):
         counts[list[i]]=0
     img = cv2.imread(image)
-    gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+    try: gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+    except: return 0
     for i in range(gray.shape[0]):
         for j in range(gray.shape[1]):
             value = gray[i][j]
@@ -109,20 +110,26 @@ def getSize(imageName):
 def roundness(image):
     #set maxRadius equal to half the linesize 
     img = cv2.imread(image,0)
-    img = cv2.medianBlur(img,5)
-    img = cv2.cvtColor(img,cv2.COLOR_GRAY2BGR)
+    #img = cv2.medianBlur(img,5)
+    #img = cv2.cvtColor(img,cv2.COLOR_GRAY2BGR)
     circles = cv2.HoughCircles(img,cv2.HOUGH_GRADIENT,1,20,param1=50,param2=30,minRadius=0,maxRadius=40)
     circles = np.uint16(np.around(circles))
     numCircles = 0
     for i in circles[0,:]:
         numCircles += 1
-    print(numCircles)
+    if numCircles > 10:
+        return "Round letter --> you are creative and artistic!"
+    elif numCircles < 5:
+        return "Pointed letters --> you are aggressive and intense!"
+    else:
+        return "Normal letters --> you are logical and systematic!"
 
 def handwriting(image):
     pressure = pressureAnalyzer(image)
     size = sizeAnalysis(image)
     slant = getSlant(image)
-    result = "Your results: \n" + pressure + "\n" + size + "\n" + slant
+    circles = roundness(image)
+    result = "Your results: \n" + pressure + "\n" + size + "\n" + slant + "\n" + circles
     return result
 
 def makeResultsPretty(canvas, width, height, image):
